@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"toy-docker/cgroups/subsystems"
 	"toy-docker/container"
 
 	log "github.com/sirupsen/logrus"
@@ -16,15 +17,37 @@ var runCommand = cli.Command{
 			Name:  "it",
 			Usage: "enable tty",
 		},
+		cli.StringFlag{
+			Name:  "m",
+			Usage: "memory limit",
+		},
+		cli.StringFlag{
+			Name:  "cpuset",
+			Usage: "cpuset limit",
+		},
+		cli.StringFlag{
+			Name:  "cpushare",
+			Usage: "cpushare limit",
+		},
 	},
 
 	Action: func(context *cli.Context) error {
 		if len(context.Args()) == 0 {
 			return fmt.Errorf("Missing container command")
 		}
-		cmd := context.Args().Get(0)
+
 		tty := context.Bool("it")
-		Run(tty, cmd)
+		var cmdArray []string
+		for _, cmd := range context.Args() {
+			cmdArray = append(cmdArray, cmd)
+		}
+		res := &subsystems.ResourceConfig{
+			MemoryLimit: context.String("m"),
+			CpuSet:      context.String("cpuset"),
+			CpuShare:    context.String("cpushare"),
+		}
+
+		Run(tty, cmdArray, res)
 		return nil
 	},
 }

@@ -1,7 +1,11 @@
 package container
 
 import (
+	"fmt"
+	"io/ioutil"
 	"os"
+	"os/exec"
+	"strings"
 	"syscall"
 
 	log "github.com/sirupsen/logrus"
@@ -10,16 +14,38 @@ import (
 func RunContainerInitProcess(command string, args []string) error {
 	log.Infof("In RunContainerInitProcess")
 
+	cmdArray := ReadUserCommand()
+	if cmdArray == nil || len(cmdArray) == 0 {
+		return fmt.Errorf("Run container get user command error")
+	}
+
 	//mount namespaces are shared by default, so we should explicitly declare them to be independent
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
 
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")
-	argv := []string{command}
 
-	if err := syscall.Exec(command, argv, os.Environ()); err != nil {
+	path, err := exec.LookPath(cmdArray[0])
+	if err != nil {
+		log.Errorf("Exec loop path error %v", err)
+		return err
+	}
+	log.Infof("Find path %s", path)
+
+	if err := syscall.Exec(path, cmdArray[0:], os.Environ()); err != nil {
 		log.Errorf(err.Error())
 		return err
 	}
 	return nil
+}
+
+func ReadUserCommand() []string {
+	pipe := os.NewFile(uintptr(3), "pipe")
+	msg, err := ioutil.ReadAll(pipe)
+	if err != nil {
+		log.Errorf("Read pipe error %v", err)
+		return nil
+	}
+	msgStr := string(msg)
+	return strings.Split(msgStr, " ")
 }
