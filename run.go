@@ -25,12 +25,12 @@ func Run(tty bool, cmdArray []string, res *subsystems.ResourceConfig) {
 	cgroupManager.Set(res)
 	cgroupManager.Apply(parent.Process.Pid)
 
-	sendInitCommand(cmdArray, writePipe)
+	SendInitCommand(cmdArray, writePipe)
 	parent.Wait()
 	os.Exit(-1)
 }
 
-func sendInitCommand(cmdArray []string, writePipe *os.File) {
+func SendInitCommand(cmdArray []string, writePipe *os.File) {
 	command := strings.Join(cmdArray, " ")
 	log.Infof("Command is %s", command)
 	writePipe.WriteString(command)

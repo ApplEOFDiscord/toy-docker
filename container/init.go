@@ -12,7 +12,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func RunContainerInitProcess(command string, args []string) error {
+func RunContainerInitProcess() error {
 	log.Infof("In RunContainerInitProcess")
 
 	cmdArray := ReadUserCommand()
@@ -48,6 +48,8 @@ func ReadUserCommand() []string {
 }
 
 func PivotRoot(root string) error {
+	log.Infof("In PivotRoot")
+
 	if err := syscall.Mount(root, root, "bind", syscall.MS_BIND|syscall.MS_REC, ""); err != nil {
 		return fmt.Errorf("Mount rootfs to itself error %v", err)
 	}
@@ -58,16 +60,16 @@ func PivotRoot(root string) error {
 	}
 
 	if err := syscall.PivotRoot(root, pivotDir); err != nil {
-		return fmt.Errorf("pivot_root %v", err)
+		return fmt.Errorf("Pivot_root %v", err)
 	}
 
 	if err := syscall.Chdir("/"); err != nil {
-		return fmt.Errorf("chdir / %v", err)
+		return fmt.Errorf("Chdir / %v", err)
 	}
 
 	pivotDir = filepath.Join("/", ".pivot_root")
 	if err := syscall.Unmount(pivotDir, syscall.MNT_DETACH); err != nil {
-		return fmt.Errorf("unmount pivot_root dir %v", err)
+		return fmt.Errorf("Unmount pivot_root dir %v", err)
 	}
 
 	return os.Remove(pivotDir)
@@ -80,10 +82,11 @@ func SetupMount() {
 		return
 	}
 	log.Infof("Current location is %s", pwd)
-	PivotRoot(pwd)
 
 	//mount namespaces are shared by default, so we should explicitly declare them to be independent
 	syscall.Mount("", "/", "", syscall.MS_PRIVATE|syscall.MS_REC, "")
+
+	PivotRoot(pwd)
 
 	defaultMountFlags := syscall.MS_NOEXEC | syscall.MS_NOSUID | syscall.MS_NODEV
 	syscall.Mount("proc", "/proc", "proc", uintptr(defaultMountFlags), "")

@@ -1,0 +1,25 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "a+HW4KfxlTA1ExAUrW8w6EKYoxM=",
+			"path": "github.com/sirupsen/logrus",
+			"revision": "67a7fdcf741f4d5cee82cb9800994ccfd4393ad0",
+			"revisionTime": "2019-10-26T11:39:18Z"
+		},
+		{
+			"checksumSHA1": "bnAX6QJYlLgtPQG1+Ko8JfWJA+A=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "d32e6e3b99c40f2bfaea45ea9596ed539eed1c0d",
+			"revisionTime": "2019-11-10T13:49:38Z"
+		},
+		{
+			"checksumSHA1": "RA9o8JZX+0jTbYFp4Kfy7PC7qIg=",
+			"path": "gopkg.in/urfave/cli.v1",
+			"revision": "c71fbcefd21552b70cd625b2c54466006e258ad7",
+			"revisionTime": "2019-09-12T00:05:50Z"
+		}
+	],
+	"rootPath": "toy-docker"
+}
